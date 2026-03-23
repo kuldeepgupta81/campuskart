@@ -9,6 +9,7 @@ import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup"; // 🔥 ADD THIS
 import Orders from "./pages/Orders";
 import Profile from "./pages/Profile";
 import Wishlist from "./pages/Wishlist";
@@ -40,7 +41,7 @@ export default function App() {
   return (
     <Router>
 
-      {/* ✅ NAVBAR ONLY HERE */}
+      {/* ✅ NAVBAR */}
       <Navbar />
 
       <div className="mt-16">
@@ -64,6 +65,7 @@ export default function App() {
 
           {/* 🔐 AUTH */}
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} /> {/* 🔥 MAIN FIX */}
 
           {/* 🛠️ ADMIN */}
           <Route path="/admin" element={<Admin />} />
