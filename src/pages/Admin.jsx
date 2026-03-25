@@ -12,7 +12,7 @@ export default function Admin() {
   const [editId, setEditId] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // ✅ FETCH PRODUCTS
+  // ✅ FETCH
   const fetchProducts = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/products");
@@ -26,7 +26,7 @@ export default function Admin() {
     fetchProducts();
   }, []);
 
-  // ✅ INPUT CHANGE
+  // ✅ INPUT
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -34,8 +34,12 @@ export default function Admin() {
   // ✅ IMAGE SELECT
   const handleImage = (file) => {
     if (!file) return;
+
     setForm((prev) => ({ ...prev, image: file }));
-    setPreview(URL.createObjectURL(file));
+
+    // 🔥 PREVIEW
+    const url = URL.createObjectURL(file);
+    setPreview(url);
   };
 
   // ✅ DRAG DROP
@@ -60,7 +64,10 @@ export default function Admin() {
       const data = new FormData();
       data.append("name", form.name);
       data.append("price", form.price);
-      if (form.image) data.append("image", form.image);
+
+      if (form.image) {
+        data.append("image", form.image); // 🔥 MUST
+      }
 
       if (editId) {
         await axios.put(
@@ -82,6 +89,7 @@ export default function Admin() {
       fetchProducts();
     } catch (err) {
       console.error("Submit error:", err);
+      alert("Image upload failed bro 😑");
     } finally {
       setLoading(false);
     }
@@ -102,11 +110,13 @@ export default function Admin() {
       price: p.price,
       image: null,
     });
-    setPreview(
-      p.image?.startsWith("http")
-        ? p.image
-        : `http://localhost:5000${p.image}`
-    );
+
+    // 🔥 FIXED IMAGE PATH
+    const img = p.image?.startsWith("http")
+      ? p.image
+      : `http://localhost:5000/${p.image}`;
+
+    setPreview(img);
     setEditId(p._id);
   };
 
@@ -137,7 +147,7 @@ export default function Admin() {
           className="border p-2 w-full mb-2 rounded"
         />
 
-        {/* 🔥 DRAG + CLICK BOX */}
+        {/* 🔥 UPLOAD */}
         <label
           htmlFor="fileInput"
           onDrop={handleDrop}
@@ -177,43 +187,45 @@ export default function Admin() {
 
       {/* ================= PRODUCTS ================= */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {products.map((p) => (
-          <div key={p._id} className="bg-white p-4 rounded shadow">
-            
-            {/* 🔥 FINAL IMAGE FIX */}
-            <img
-              src={
-                p.image?.startsWith("http")
-                  ? p.image
-                  : `http://localhost:5000${p.image}`
-              }
-              onError={(e) =>
-                (e.target.src =
-                  "https://img.icons8.com/color/512/product.png")
-              }
-              className="h-24 object-cover mb-2 w-full rounded"
-            />
+        {products.map((p) => {
+          const img = p.image?.startsWith("http")
+            ? p.image
+            : `http://localhost:5000/${p.image}`;
 
-            <h3 className="font-semibold">{p.name}</h3>
-            <p className="text-purple-600">₹{p.price}</p>
+          return (
+            <div key={p._id} className="bg-white p-4 rounded shadow">
 
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={() => handleEdit(p)}
-                className="bg-blue-500 text-white px-2 py-1 rounded w-full"
-              >
-                Edit
-              </button>
+              {/* 🔥 FINAL IMAGE */}
+              <img
+                src={img}
+                onError={(e) =>
+                  (e.target.src =
+                    "https://img.icons8.com/color/512/product.png")
+                }
+                className="h-24 object-cover mb-2 w-full rounded"
+              />
 
-              <button
-                onClick={() => handleDelete(p._id)}
-                className="bg-red-500 text-white px-2 py-1 rounded w-full"
-              >
-                Delete
-              </button>
+              <h3 className="font-semibold">{p.name}</h3>
+              <p className="text-purple-600">₹{p.price}</p>
+
+              <div className="flex gap-2 mt-2">
+                <button
+                  onClick={() => handleEdit(p)}
+                  className="bg-blue-500 text-white px-2 py-1 rounded w-full"
+                >
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => handleDelete(p._id)}
+                  className="bg-red-500 text-white px-2 py-1 rounded w-full"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

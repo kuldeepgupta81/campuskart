@@ -1,30 +1,50 @@
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function Navbar() {
   const { cart } = useCart();
   const { wishlist } = useWishlist();
   const navigate = useNavigate();
 
-  const user = JSON.parse(localStorage.getItem("user") || "null");
-  const isAdmin = user?.isAdmin;
+  const [user, setUser] = useState(null);
+
+  // 🔥 USER SYNC
+  useEffect(() => {
+    const loadUser = () => {
+      const u = JSON.parse(localStorage.getItem("user") || "null");
+      setUser(u);
+    };
+
+    loadUser();
+
+    window.addEventListener("userChanged", loadUser);
+    window.addEventListener("storage", loadUser);
+
+    return () => {
+      window.removeEventListener("userChanged", loadUser);
+      window.removeEventListener("storage", loadUser);
+    };
+  }, []);
+
+  const isAdmin = user?.role === "admin";
 
   const handleLogout = () => {
     localStorage.removeItem("user");
+    window.dispatchEvent(new Event("userChanged"));
     navigate("/");
-    window.location.reload();
   };
 
   return (
-    <nav className="flex justify-between items-center px-6 py-3 bg-white shadow sticky top-0 z-50">
+    <nav className="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-3 bg-white shadow z-[9999]">
 
       {/* LOGO */}
       <div
         onClick={() => navigate("/")}
-        className="flex items-center gap-2 cursor-pointer"
+        className="flex items-center gap-2 cursor-pointer hover:scale-105 transition"
       >
-        <img src="/logo.png" className="w-8 h-8" />
+        <img src="/logo.png" className="w-8 h-8" alt="logo" />
         <h1 className="text-xl font-bold text-purple-600">
           CampusKart
         </h1>
@@ -33,23 +53,22 @@ export default function Navbar() {
       {/* LINKS */}
       <div className="flex gap-4 items-center">
 
-        <button onClick={() => navigate("/products")}>
+        <button onClick={() => navigate("/products")} className="hover:text-purple-600">
           Products
         </button>
 
-        <button onClick={() => navigate("/wishlist")}>
-          ❤️ {wishlist?.length || 0}
+        <button onClick={() => navigate("/wishlist")} className="hover:text-red-500">
+          ❤️ {wishlist.length}
         </button>
 
-        <button onClick={() => navigate("/cart")}>
-          🛒 {cart?.length || 0}
+        <button onClick={() => navigate("/cart")} className="hover:text-green-600">
+          🛒 {cart.length}
         </button>
 
-        <button onClick={() => navigate("/orders")}>
+        <button onClick={() => navigate("/orders")} className="hover:text-blue-600">
           Orders 📦
         </button>
 
-        {/* ADMIN */}
         {isAdmin && (
           <button
             onClick={() => navigate("/admin")}
@@ -65,7 +84,7 @@ export default function Navbar() {
               onClick={() => navigate("/profile")}
               className="bg-blue-500 text-white px-3 py-1 rounded"
             >
-              Profile 👤
+              Profile
             </button>
 
             <button

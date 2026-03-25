@@ -8,8 +8,7 @@ import Home from "./pages/Home";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup"; // 🔥 ADD THIS
+import Login from "./pages/Login"; // 🔐 Auth (Login + Signup)
 import Orders from "./pages/Orders";
 import Profile from "./pages/Profile";
 import Wishlist from "./pages/Wishlist";
@@ -19,11 +18,13 @@ import Checkout from "./pages/Checkout";
 // ✅ SUCCESS PAGE
 function Success() {
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
       <h1 className="text-3xl font-bold text-green-600">
         Order Placed Successfully ✅
       </h1>
-      <p className="mt-2">Thank you for shopping with CampusKart</p>
+      <p className="mt-2 text-gray-600">
+        Thank you for shopping with CampusKart
+      </p>
     </div>
   );
 }
@@ -31,7 +32,7 @@ function Success() {
 // ❌ 404 PAGE
 function NotFound() {
   return (
-    <div className="flex items-center justify-center h-screen text-2xl font-bold">
+    <div className="flex items-center justify-center h-screen text-2xl font-bold bg-gray-100">
       404 - Page Not Found 🚫
     </div>
   );
@@ -40,11 +41,12 @@ function NotFound() {
 export default function App() {
   return (
     <Router>
-
+      
       {/* ✅ NAVBAR */}
       <Navbar />
 
-      <div className="mt-16">
+      {/* ✅ MAIN CONTENT */}
+      <div className="mt-16 min-h-screen bg-gray-50">
         <Routes>
 
           {/* 🏠 HOME */}
@@ -65,7 +67,6 @@ export default function App() {
 
           {/* 🔐 AUTH */}
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} /> {/* 🔥 MAIN FIX */}
 
           {/* 🛠️ ADMIN */}
           <Route path="/admin" element={<Admin />} />

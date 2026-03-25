@@ -1,20 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function GroupDeal({ basePrice = 0, onPriceChange }) {
   const [users, setUsers] = useState(1);
 
-  const price =
-    users >= 5
-      ? basePrice * 0.6
-      : users >= 3
-      ? basePrice * 0.8
-      : basePrice;
+  const calculatePrice = (count) => {
+    if (count >= 5) return basePrice * 0.6;
+    if (count >= 3) return basePrice * 0.8;
+    return basePrice;
+  };
 
-  useEffect(() => {
-    if (typeof onPriceChange === "function") {
-      onPriceChange(Math.floor(price));
-    }
-  }, [users, basePrice]);
+  const handleJoin = () => {
+    const newUsers = users + 1;
+    setUsers(newUsers);
+
+    const newPrice = calculatePrice(newUsers);
+    onPriceChange(Math.floor(newPrice));
+  };
 
   return (
     <div className="border p-3 rounded mt-3 bg-gray-50">
@@ -23,15 +24,18 @@ export default function GroupDeal({ basePrice = 0, onPriceChange }) {
       <p>Users Joined: {users}</p>
 
       <button
-        onClick={() => setUsers(users + 1)}
-        className="bg-green-600 text-white px-3 py-1 mt-2 rounded"
+        onClick={handleJoin}
+        className="bg-green-600 text-white px-3 py-1 mt-2 rounded hover:bg-green-700"
       >
         Join Group
       </button>
 
-      <p className="mt-2 font-semibold text-purple-600">
-        Discount Price: ₹{Math.floor(price)}
-      </p>
+      {/* ❌ REMOVE AUTO PRICE UPDATE */}
+      {users > 1 && (
+        <p className="mt-2 font-semibold text-purple-600">
+          Discount Price: ₹{Math.floor(calculatePrice(users))}
+        </p>
+      )}
     </div>
   );
 }

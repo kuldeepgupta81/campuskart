@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function Signup() {
+export default function Login() {
   const navigate = useNavigate();
+
+  const [isSignup, setIsSignup] = useState(false);
 
   const [name, setName] = useState("");
   const [year, setYear] = useState("4th Year");
@@ -10,45 +12,62 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSignup = () => {
-    if (!name || !email || !password) {
-      return alert("Fill all fields ❌");
+  const handleAuth = () => {
+    console.log("CLICKED 🔥");
+
+    // ✅ VALIDATION
+    if (!email.trim() || !password.trim()) {
+      alert("Email aur password daal bhai 😑");
+      return;
     }
 
-    // ✅ SIMPLE EMAIL VALIDATION (NO BUG)
-    if (!email.includes("@")) {
-      return alert("Enter valid email ❌");
+    if (!name.trim()) {
+      alert("Name daal bhai 😑");
+      return;
     }
 
-    // 🔥 SAVE USER
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
-        name,
-        year,
-        branch,
-        email,
-      })
-    );
+    const cleanEmail = email.trim().toLowerCase();
 
-    alert("Account Created ✅");
-    navigate("/");
-    window.location.reload();
+    // 🔥 ADMIN ONLY
+    const isAdmin = cleanEmail === "admin@campus.com";
+
+    const userData = {
+      name,
+      year,
+      branch,
+      email: cleanEmail,
+      role: isAdmin ? "admin" : "user",
+    };
+
+    // ✅ CLEAR OLD USER
+    localStorage.removeItem("user");
+
+    // ✅ SAVE NEW USER
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    // 🔥 FORCE UI UPDATE
+    window.dispatchEvent(new Event("userChanged"));
+
+    console.log("LOGIN SUCCESS ✅", userData);
+
+    navigate("/products");
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
-      <div className="bg-gray-800 p-8 rounded-xl shadow-lg w-96">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
+      
+      <div className="bg-gray-800 p-8 rounded-2xl shadow-xl w-96">
 
         <h1 className="text-2xl font-bold text-center mb-6">
-          Join CampusKart 🚀
+          {isSignup ? "Create Account 🚀" : "Welcome Back 👋"}
         </h1>
 
+        {/* 🔥 ALWAYS SHOW (FIX) */}
         <input
           placeholder="Full Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full p-2 mb-3 rounded bg-gray-700"
+          className="w-full p-2 mb-3 rounded bg-gray-700 focus:outline-none"
         />
 
         <select
@@ -72,27 +91,40 @@ export default function Signup() {
           <option>ECE</option>
         </select>
 
+        {/* EMAIL */}
         <input
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 mb-3 rounded bg-gray-700"
+          className="w-full p-2 mb-3 rounded bg-gray-700 focus:outline-none"
         />
 
+        {/* PASSWORD */}
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 mb-4 rounded bg-gray-700"
+          className="w-full p-2 mb-4 rounded bg-gray-700 focus:outline-none"
         />
 
+        {/* BUTTON */}
         <button
-          onClick={handleSignup}
-          className="w-full bg-purple-600 p-2 rounded hover:bg-purple-700"
+          onClick={handleAuth}
+          className="w-full bg-purple-600 p-2 rounded hover:bg-purple-700 transition"
         >
-          Create Account
+          {isSignup ? "Create Account" : "Login"}
         </button>
+
+        {/* TOGGLE */}
+        <p
+          onClick={() => setIsSignup(!isSignup)}
+          className="text-center mt-4 text-sm text-gray-400 cursor-pointer hover:text-white"
+        >
+          {isSignup
+            ? "Already have an account? Login"
+            : "New user? Create account"}
+        </p>
 
       </div>
     </div>

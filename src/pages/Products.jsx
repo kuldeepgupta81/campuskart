@@ -12,30 +12,37 @@ export default function Products() {
   const { cart } = useCart();
   const [openDrawer, setOpenDrawer] = useState(false);
 
+  // 🔥 USER CHANGE → RE-RENDER (NO REFETCH)
+  const [refresh, setRefresh] = useState(false);
+
+  useEffect(() => {
+    const update = () => setRefresh((prev) => !prev);
+
+    window.addEventListener("userChanged", update);
+    return () => window.removeEventListener("userChanged", update);
+  }, []);
+
+  // 🔥 FETCH ONLY ON FIRST LOAD
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch("http://localhost:5000/api/products");
         const data = await res.json();
 
-        console.log("API DATA 👉", data);
-
         if (!Array.isArray(data) || data.length === 0) {
           setProducts([
-            { _id: 1, name: "Book", price: 500 },
-            { _id: 2, name: "Shoes", price: 1200 },
-            { _id: 3, name: "Laptop", price: 50000 },
-            { _id: 4, name: "Headphone", price: 1500 },
+            { _id: 1, name: "Book", price: 600 },
+            { _id: 2, name: "Watch", price: 800 },
+            { _id: 3, name: "Phone", price: 900 },
+            { _id: 4, name: "Headphone", price: 1000 },
           ]);
         } else {
           setProducts(data);
         }
       } catch (err) {
-        console.error("Fetch error:", err);
-
         setProducts([
-          { _id: 1, name: "Book", price: 500 },
-          { _id: 2, name: "Shoes", price: 1200 },
+          { _id: 1, name: "Book", price: 600 },
+          { _id: 2, name: "Watch", price: 800 },
         ]);
       } finally {
         setLoading(false);
@@ -43,24 +50,21 @@ export default function Products() {
     };
 
     fetchProducts();
-  }, []);
+  }, []); // ❌ REMOVE refresh dependency
 
+  // 🔥 FILTER
   const filtered = products.filter((p) =>
     p?.name?.toLowerCase().includes(search.toLowerCase())
   );
 
   if (loading) {
-    return (
-      <div className="p-6 text-center text-xl font-semibold">
-        Loading...
-      </div>
-    );
+    return <div className="p-6 text-center">Loading...</div>;
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 min-h-screen bg-gray-50">
 
-      {/* 🔍 TOP BAR */}
+      {/* 🔍 SEARCH + CART */}
       <div className="flex justify-between items-center mb-4 gap-3">
         <input
           type="text"
@@ -83,26 +87,23 @@ export default function Products() {
         </div>
       </div>
 
-      {/* 🤖 AI ASSISTANT (🔥 TOP PE SHIFTED) */}
+      {/* 🤖 AI */}
       <div className="bg-gray-100 p-4 rounded-xl shadow mb-6">
         <h2 className="font-bold mb-2">🤖 AI Shopping Assistant</h2>
         <ChatAssistant products={products} />
       </div>
 
-      {/* 🛍️ PRODUCTS */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {filtered.length > 0 ? (
-          filtered.map((p) => (
-            <ProductCard key={p._id} product={p} />
-          ))
-        ) : (
-          <p className="col-span-full text-center text-gray-500">
-            No products found 😢
-          </p>
-        )}
+      {/* 🛍️ GRID FIX */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-start">
+        {filtered.map((p) => (
+          <ProductCard
+            key={p._id + refresh} // 🔥 FORCE RE-RENDER ON LOGIN
+            product={p}
+          />
+        ))}
       </div>
 
-      {/* 🛒 DRAWER */}
+      {/* 🧾 DRAWER */}
       <CheckoutDrawer open={openDrawer} setOpen={setOpenDrawer} />
     </div>
   );

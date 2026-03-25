@@ -1,46 +1,57 @@
 import { useWishlist } from "../context/WishlistContext";
 
 export default function Wishlist() {
-  const { wishlist, toggleWishlist } = useWishlist();
+  const { wishlist, removeFromWishlist } = useWishlist();
 
   const getImage = (name) => {
-    return `https://source.unsplash.com/300x300/?${name}`;
+    const n = (name || "").toLowerCase();
+
+    if (n.includes("book")) return "/book.png";
+    if (n.includes("watch")) return "/watch.png";
+    if (n.includes("phone")) return "/iphone.png";
+    if (n.includes("headphone")) return "/headphone.png";
+
+    return "/book.png";
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen">
-
-      <h1 className="text-3xl font-bold p-6">❤️ Wishlist</h1>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-6">❤️ Wishlist</h1>
 
       {wishlist.length === 0 ? (
-        <p className="p-6 text-gray-500">No items yet 😔</p>
+        <p>No items</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
-          {wishlist.map((item) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+          {wishlist.map((item, index) => (
             <div
-              key={item._id}
-              className="bg-white p-4 rounded shadow"
+              key={index}
+              className="bg-white p-4 rounded-xl shadow"
             >
+
               <img
-                src={
-                  item.image && item.image.startsWith("http")
-                    ? item.image
-                    : getImage(item.name)
-                }
-                className="w-full h-40 object-cover rounded"
+                src={getImage(item.name)}
+                className="h-40 w-full object-contain mb-3"
               />
 
-              <h2 className="mt-2 font-bold">{item.name}</h2>
-              <p className="text-green-600">₹{item.price}</p>
+              <h3 className="font-semibold">{item.name}</h3>
+
+              <p className="text-green-600 font-bold">
+                ₹{item.price}
+              </p>
 
               <button
-                onClick={() => toggleWishlist(item)}
-                className="mt-2 bg-red-500 text-white px-3 py-1 rounded"
+                onClick={() => {
+                  removeFromWishlist(index);
+                }}
+                className="bg-red-500 text-white px-3 py-1 mt-2 rounded"
               >
                 Remove
               </button>
+
             </div>
           ))}
+
         </div>
       )}
     </div>
