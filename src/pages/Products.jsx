@@ -12,7 +12,39 @@ export default function Products() {
   const { cart } = useCart();
   const [openDrawer, setOpenDrawer] = useState(false);
 
-  // 🔥 FULL DUMMY DATA (IMPORTANT)
+  const [refresh, setRefresh] = useState(false);
+
+  useEffect(() => {
+    const update = () => setRefresh((prev) => !prev);
+    window.addEventListener("userChanged", update);
+    return () => window.removeEventListener("userChanged", update);
+  }, []);
+
+  // 🔥 IMAGE MAPPING (IMPORTANT)
+  const imageMap = {
+    book: "/book.png",
+    watch: "/watch.png",
+    phone: "/phone.png",
+    headphone: "/headphone.png",
+    keyboard: "/keyboard.png",
+    mouse: "/mouse.png",
+    bag: "/bag.png",
+    shoes: "/shoes.png",
+    laptop: "/laptop.png",
+    camera: "/camera.png",
+    speaker: "/speaker.png",
+    jacket: "/jacket.png",
+    chair: "/chair.png",
+    pant: "/pant.png",
+    pen: "/pen.png",
+    notebook: "/notebook.png",
+    tablet: "/tablet.png",
+    bottle: "/bottle.png",
+    tshirt: "/tshirt.png",
+    sunglasses: "/sunglasses.png",
+  };
+
+  // 🔥 FULL DUMMY DATA
   const dummyProducts = [
     { _id: 1, name: "Book", price: 600 },
     { _id: 2, name: "Watch", price: 800 },
@@ -27,9 +59,13 @@ export default function Products() {
     { _id: 11, name: "Speaker", price: 2000 },
     { _id: 12, name: "Jacket", price: 2200 },
     { _id: 13, name: "Chair", price: 3000 },
-    { _id: 14, name: "Table", price: 4000 },
+    { _id: 14, name: "Pant", price: 4000 },
     { _id: 15, name: "Pen", price: 100 },
     { _id: 16, name: "Notebook", price: 200 },
+    { _id: 17, name: "Tablet", price: 1600 },
+    { _id: 18, name: "Bottle", price: 1300 },
+    { _id: 19, name: "T-shirt", price: 2000 },
+    { _id: 20, name: "Sunglasses", price: 2200 },
   ];
 
   useEffect(() => {
@@ -38,14 +74,27 @@ export default function Products() {
         const res = await fetch("http://localhost:5000/api/products");
         const data = await res.json();
 
-        if (!Array.isArray(data) || data.length === 0) {
-          setProducts(dummyProducts);
-        } else {
-          setProducts(data);
-        }
+        const finalData =
+          Array.isArray(data) && data.length > 0 ? data : dummyProducts;
+
+        // 🔥 ADD IMAGE AUTOMATICALLY
+        const withImages = finalData.map((p) => ({
+          ...p,
+          image:
+            imageMap[p.name?.toLowerCase()] ||
+            "https://via.placeholder.com/300",
+        }));
+
+        setProducts(withImages);
       } catch (err) {
-        // 🔥 ALWAYS SHOW FULL DATA
-        setProducts(dummyProducts);
+        const withImages = dummyProducts.map((p) => ({
+          ...p,
+          image:
+            imageMap[p.name?.toLowerCase()] ||
+            "https://via.placeholder.com/300",
+        }));
+
+        setProducts(withImages);
       } finally {
         setLoading(false);
       }
@@ -54,7 +103,6 @@ export default function Products() {
     fetchProducts();
   }, []);
 
-  // 🔍 FILTER
   const filtered = products.filter((p) =>
     p?.name?.toLowerCase().includes(search.toLowerCase())
   );
@@ -64,7 +112,7 @@ export default function Products() {
   }
 
   return (
-    <div className="p-2 min-h-screen bg-gray-50">
+    <div className="p-3 min-h-screen bg-gray-50">
 
       {/* SEARCH + CART */}
       <div className="flex justify-between items-center mb-4 gap-2">
@@ -95,14 +143,16 @@ export default function Products() {
         <ChatAssistant products={products} />
       </div>
 
-      {/* 🔥 FINAL GRID (FORCE 4 EVERYWHERE) */}
+      {/* 🔥 FORCE 4 COLUMN */}
       <div className="grid grid-cols-4 gap-2">
         {filtered.map((p) => (
-          <ProductCard key={p._id} product={p} />
+          <ProductCard
+            key={p._id + refresh}
+            product={p}
+          />
         ))}
       </div>
 
-      {/* DRAWER */}
       <CheckoutDrawer open={openDrawer} setOpen={setOpenDrawer} />
     </div>
   );
